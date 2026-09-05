@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>燕郊中学教务管理系统</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:"Microsoft YaHei","微软雅黑",SimSun,Arial,sans-serif;background:#e6ebf2;color:#222;font-size:14px;}
+.wrap{max-width:1200px;margin:0 auto;min-height:100vh;}
+.header{background:#1f4e79;color:#fff;}
+.header-inner{max-width:1200px;margin:0 auto;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+.header-title{font-size:20px;font-weight:bold;letter-spacing:2px;}
+.header-sub{font-size:11px;color:#a9c6e4;margin-top:2px;}
+.header-right{font-size:13px;color:#d5e5f5;}
+.header-right a{color:#ffd966;text-decoration:none;}
+.header-right a:hover{text-decoration:underline;}
+.statusbar{background:#fff3cd;border-bottom:1px solid #e0c26b;color:#7a5b00;font-size:13px;padding:6px 16px;}
+.statusbar .red{color:#c00000;font-weight:bold;}
+.statusbar .green{color:#2a7a2a;font-weight:bold;}
+.menu{background:#f0f4f8;border-bottom:2px solid #1f4e79;padding:8px 10px;display:flex;flex-wrap:wrap;}
+.menu-btn{display:inline-block;padding:7px 14px;margin:3px 4px;background:#e3ebf4;border:1px solid #b8c9db;border-radius:3px;cursor:pointer;font-size:13px;color:#1f4e79;font-family:inherit;}
+.menu-btn:hover{background:#cfddef;}
+.menu-btn.active{background:#1f4e79;color:#fff;border-color:#1f4e79;}
+.content{background:#fff;min-height:480px;border:1px solid #c4cfdd;border-top:none;padding:0;}
+.view{display:none;padding:18px 22px;}
+.view.active{display:block;}
+.page-title{border-bottom:1px solid #d3dce6;padding-bottom:8px;margin-bottom:14px;font-size:17px;font-weight:bold;color:#1f4e79;}
+.page-title small{font-weight:normal;font-size:12px;color:#666;}
+table{width:100%;border-collapse:collapse;margin:10px 0;}
+th,td{border:1px solid #b8c9db;padding:7px 9px;text-align:left;font-size:13px;}
+th{background:#e8eef6;color:#1f4e79;}
+tr:nth-child(even) td{background:#f7fafd;}
+.info-box{background:#f4f8fb;border:1px solid #cfe0ef;padding:12px 14px;margin:12px 0;font-size:13px;line-height:1.9;}
+.info-box.warn{border-color:#f0d9a0;background:#fff8e6;}
+.alert-box{background:#fdf0f0;border:1px solid #e6b8b8;color:#a00000;padding:10px 14px;margin:12px 0;font-size:13px;}
+label{display:block;margin:8px 0 4px;font-size:13px;color:#333;}
+input[type=text],input[type=password],input[type=date],textarea,select{width:100%;max-width:520px;padding:7px 9px;border:1px solid #b8c9db;border-radius:3px;font-size:13px;font-family:inherit;background:#fff;}
+textarea{min-height:70px;resize:vertical;}
+.btn{display:inline-block;padding:7px 18px;background:#2e6da4;color:#fff;border:1px solid #245580;border-radius:3px;cursor:pointer;font-size:13px;font-family:inherit;}
+.btn:hover{background:#245580;}
+.btn-gray{background:#8a97a6;border-color:#76838f;}
+.btn-gray:hover{background:#76838f;}
+.log-item{padding:8px 10px;border-bottom:1px dashed #d5dde6;font-size:13px;line-height:1.7;}
+.log-item .lt{color:#1f4e79;font-weight:bold;margin-right:8px;}
+.log-item .ltype{color:#6b7a8d;margin-right:8px;}
+.item-box{padding:9px 4px;border-bottom:1px solid #e3e9f0;}
+.item-box .ihead{font-size:12px;color:#6b7a8d;margin-bottom:3px;}
+.item-box .ibody{font-size:14px;line-height:1.7;word-break:break-all;}
+.footer{background:#dbe4ee;border-top:1px solid #c0cddc;color:#4a5a6c;text-align:center;padding:9px;font-size:12px;}
+.overlay{display:none;position:fixed;inset:0;background:rgba(20,30,45,.55);z-index:999;}
+.overlay.show{display:flex;align-items:flex-start;justify-content:center;padding-top:8vh;}
+.modal{background:#fff;width:94%;max-width:520px;border:1px solid #2c5b8f;box-shadow:0 6px 24px rgba(0,0,0,.35);}
+.modal-head{background:#1f4e79;color:#fff;padding:10px 14px;font-size:15px;font-weight:bold;}
+.modal-body{padding:16px 18px;font-size:14px;line-height:1.9;}
+.modal-foot{padding:12px 18px;text-align:right;background:#f2f5f9;border-top:1px solid #dbe3ec;}
+.modal-foot .btn{margin-left:8px;}
+.big-warn{font-size:18px;font-weight:bold;color:#c00000;margin-bottom:8px;}
+.muted{color:#888;font-size:12px;}
+.red{color:#c00000;}
+.green{color:#2a7a2a;}
+@media (max-width:600px){
+  .header-title{font-size:16px;}
+  .view{padding:12px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-inner">
+      <div>
+        <div class="header-title">燕郊中学 教务管理系统</div>
+        <div class="header-sub">Yanjiao Middle School Teaching Affairs Management System</div>
+      </div>
+      <div class="header-right">
+        欢迎您：<span id="topName">访客</span>（<span id="topRole">访客</span>） ｜ <span id="topTime"></span> ｜ <a href="javascript:;" onclick="logout()">退出登录</a>
+      </div>
+    </div>
+  </div>
+  <div class="statusbar">系统状态：<span class="red">已停止维护</span> ｜ 全部业务已迁移至新平台 ｜ 当前学年：2026—2027 ｜ 数据服务：<span id="dataStatus">检测中…</span></div>
+  <div class="menu">
+    <button class="menu-btn active" onclick="goto('home')">系统首页</button>
+    <button class="menu-btn" onclick="goto('log')">系统日志</button>
+    <button class="menu-btn" onclick="goto('profile')">个人中心</button>
+    <button class="menu-btn" onclick="goto('msg')">留言板</button>
+    <button class="menu-btn" onclick="goto('brd')">校内广播</button>
+    <button class="menu-btn" onclick="goto('memo')">备忘录</button>
+    <button class="menu-btn" onclick="goto('student')">学生管理</button>
+    <button class="menu-btn" onclick="goto('score')">成绩管理</button>
+    <button class="menu-btn" onclick="goto('class')">班级管理</button>
+    <button class="menu-btn" onclick="goto('course')">课表管理</button>
+    <button class="menu-btn" onclick="goto('exam')">考试管理</button>
+  </div>
+  <div class="content">
+    <div id="view-home" class="view active">
+      <div class="page-title">系统首页 <small>System Home</small></div>
+      <div class="alert-box">【重要提示】本站点已停止使用，本系统不再维护，所有业务迁移至新平台。如需办理教务业务，请访问新版教务网站。</div>
+      <div class="info-box">
+        <b>欢迎使用燕郊中学教务管理系统</b><br>
+        系统版本：V4.2.1（旧版）<br>
+        当前用户：<span id="homeName">访客</span> ｜ 用户身份：<span id="homeRole">访客</span> ｜ 所属学年：2026—2027<br>
+        上次数据备份：2026-08-31 14:36:51 ｜ 服务器状态：离线（历史快照）<br>
+        <span class="muted">本系统为校内教职工提供日常教务管理服务，包括学生信息、成绩、班级、课表、考试等数据的管理与查询。</span>
+      </div>
+      <table>
+        <tr><th>服务项目</th><th>运行状态</th><th>说明</th></tr>
+        <tr><td>学生数据服务</td><td class="red">已迁移</td><td>数据已同步至新平台</td></tr>
+        <tr><td>成绩数据服务</td><td class="red">已迁移</td><td>数据已同步至新平台</td></tr>
+        <tr><td>课表数据服务</td><td class="red">已迁移</td><td>数据已同步至新平台</td></tr>
+        <tr><td>校内公告服务</td><td class="green">保留</td><td>旧系统内仍可查看历史记录</td></tr>
+        <tr><td>意见留言板</td><td class="green">保留</td><td>用于收集师生意见与建议</td></tr>
+      </table>
+    </div>
+
+    <div id="view-log" class="view">
+      <div class="page-title">系统日志 <small>System Log</small></div>
+      <div class="info-box">此处记录本系统近期的运行日志与操作记录，仅供管理员查阅。</div>
+      <div id="logList"></div>
+    </div>
+
+    <div id="view-profile" class="view">
+      <div class="page-title">个人中心 <small>Personal Center</small></div>
+      <div class="info-box">
+        <b>账号信息</b><br>
+        姓名：<span id="pfName">访客</span> ｜ 身份：<span id="pfRole">访客</span> ｜ 激活状态：<span id="pfAct">未激活</span>
+      </div>
+      <div id="activateBox">
+        <label>激活码：</label>
+        <input type="password" id="actInput" placeholder="请输入激活码">
+        <div style="margin-top:12px;">
+          <button class="btn" onclick="doActivate()">激活校内人员权限</button>
+        </div>
+        <div class="info-box warn" style="margin-top:14px;">
+          说明：校内人员账号由教务处统一发放激活码。访客账号仅可访问系统首页、系统日志及个人中心。如需激活权限，请从教务处公布的资料中获取激活码。
+        </div>
+      </div>
+      <div id="activatedBox" style="display:none;">
+        <div class="info-box" style="border-color:#9fca9f;background:#f2fbf2;">
+          <b class="green">激活成功</b><br>
+          当前账号已激活为「校内人员」权限，可使用留言板、校内广播、备忘录等校内功能。
+        </div>
+      </div>
+    </div>
+
+    <div id="view-msg" class="view">
+      <div class="page-title">留言板 <small>Message Board</small></div>
+      <div class="info-box">本留言板用于收集在校师生及家长的意见与建议，欢迎各位留言。留言内容将保留在系统中供全体师生查看。</div>
+      <div id="msgForm">
+        <label>昵称：</label>
+        <input type="text" id="msgName" maxlength="20">
+        <label>留言内容：</label>
+        <textarea id="msgContent" placeholder="请输入留言内容"></textarea>
+        <div style="margin-top:10px;"><button class="btn" onclick="addMsg()">提交留言</button></div>
+      </div>
+      <div style="margin-top:18px;border-top:2px solid #1f4e79;padding-top:8px;font-weight:bold;color:#1f4e79;">留言记录</div>
+      <div id="msgList" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="view-brd" class="view">
+      <div class="page-title">校内广播 <small>Campus Broadcast</small></div>
+      <div class="info-box">校内广播用于向全校师生发布通知与安排，编辑后即时广播，并保留完整广播记录（时间、广播人、内容）。</div>
+      <div id="brdForm">
+        <label>广播人：</label>
+        <input type="text" id="brdName" maxlength="20">
+        <label>广播内容：</label>
+        <textarea id="brdContent" placeholder="请输入广播内容"></textarea>
+        <div style="margin-top:10px;"><button class="btn" onclick="addBrd()">发布广播</button></div>
+      </div>
+      <div style="margin-top:18px;border-top:2px solid #1f4e79;padding-top:8px;font-weight:bold;color:#1f4e79;">广播记录</div>
+      <div id="brdList" style="margin-top:6px;"></div>
+    </div>
+
+    <div id="view-memo" class="view">
+      <div class="page-title">备忘录 <small>Memo</small></div>
+      <div class="info-box">年级备忘录用于记录近期工作安排与待办事项，按「姓名 · 日期 · 事项」登记，公开供全体师生查看。</div>
+      <div id="memoForm">
+        <label>姓名：</label>
+        <input type="text" id="memoWho" maxlength="20">
+        <label>日期：</label>
+        <input type="date" id="memoDate">
+        <label>事项：</label>
+        <input type="text" id="memoTask" maxlength="60" placeholder="请输入待办事项">
+        <div style="margin-top:10px;"><button class="btn" onclick="addMemo()">登记备忘</button></div>
+      </div>
+      <div style="margin-top:18px;border-top:2px solid #1f4e79;padding-top:8px;font-weight:bold;color:#1f4e79;">备忘列表</div>
+      <div id="memoList" style="margin-top:6px;"></div>
+    </div>
+  </div>
+  <div class="footer">燕郊中学教务处 © 2004-2026 ｜ 技术支持：燕郊中学信息中心 ｜ 本系统已停止维护</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<script>
+var ACTIVATION_CODE = 'YJ-2026-0901';
+var LS_USER='yjzx_user', LS_LOG='yjzx_log', LS_LOGFLAG='yjzx_logflag';
+var LS_MSGS='yjzx_msgs', LS_BRDS='yjzx_brds', LS_MEMOS='yjzx_memos';
+
+var cloudReady = false;
+
+function getLS(k,f){try{var v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;}}
+function setLS(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function esc(s){return (s==null?'':String(s)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function p2(n){return n<10?'0'+n:''+n;}
+function nowStr(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())+' '+p2(d.getHours())+':'+p2(d.getMinutes())+':'+p2(d.getSeconds());}
+function getUser(){return getLS(LS_USER,null);}
+
+/* ===== 弹窗 ===== */
+function showModal(title, bodyHTML, footHTML){
+  document.getElementById('modalBox').innerHTML =
+    '<div class="modal-head">'+title+'</div>'+
+    '<div class="modal-body">'+bodyHTML+'</div>'+
+    (footHTML?'<div class="modal-foot">'+footHTML+'</div>':'');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('overlay').classList.remove('show');}
+
+/* ===== 登录姓名 → 系统公告 ===== */
+function askName(){
+  showModal('登录教务系统',
+    '<div style="margin-bottom:6px;">请输入您的姓名：</div>'+
+    '<input type="text" id="nameInput" maxlength="20" placeholder="请输入姓名" style="max-width:100%;">',
+    '<button class="btn" onclick="submitName()">进入系统</button>');
+  setTimeout(function(){var i=document.getElementById('nameInput'); if(i) i.focus();},50);
+}
+function submitName(){
+  var n=(document.getElementById('nameInput').value||'').trim();
+  if(!n){return;}
+  setLS(LS_USER,{name:n,role:'visitor'});
+  closeModal();
+  refreshTop();
+  showNotice();
+}
+function showNotice(){
+  showModal('系统公告',
+    '<div class="big-warn">本站点已停止使用，请访问新版教务网站</div>'+
+    '本系统不再维护，所有业务迁移至新平台。感谢您多年来的使用与支持。<br><br>'+
+    '<span class="muted">关闭本窗口后将进入系统。</span>',
+    '<button class="btn" onclick="closeModal();goto(\'home\');">我知道了</button>');
+}
+
+/* ===== 顶部/用户信息 ===== */
+function refreshTop(){
+  var u=getUser(); var name=u&&u.name?u.name:'访客'; var role=u&&u.role==='staff'?'校内人员':'访客';
+  document.getElementById('topName').textContent=name;
+  document.getElementById('topRole').textContent=role;
+  document.getElementById('homeName').textContent=name;
+  document.getElementById('homeRole').textContent=role;
+}
+function logout(){
+  localStorage.removeItem(LS_USER);
+  document.querySelectorAll('.menu-btn').forEach(function(b){b.classList.remove('active');});
+  var views=document.querySelectorAll('.view');
+  for(var i=0;i<views.length;i++){views[i].classList.remove('active');}
+  document.getElementById('view-home').classList.add('active');
+  var m=document.querySelectorAll('.menu-btn')[0]; if(m)m.classList.add('active');
+  refreshTop();
+  askName();
+}
+
+/* ===== 菜单跳转与权限 ===== */
+var NEED=['msg','brd','memo','student','score','class','course','exam'];
+var NOT_READY=['student','score','class','course','exam'];
+function setActiveMenu(m){
+  var btns=document.querySelectorAll('.menu-btn');
+  var map={home:0,log:1,profile:2,msg:3,brd:4,memo:5,student:6,score:7,class:8,course:9,exam:10};
+  for(var i=0;i<btns.length;i++){btns[i].classList.remove('active');}
+  if(map[m]!=null&&btns[map[m]]){btns[map[m]].classList.add('active');}
+}
+function showView(m){
+  var views=document.querySelectorAll('.view');
+  for(var i=0;i<views.length;i++){views[i].classList.remove('active');}
+  document.getElementById('view-'+m).classList.add('active');
+  if(m==='log'){renderLog();}
+  if(m==='profile'){renderProfile();}
+  if(m==='msg'){renderMsgs();}
+  if(m==='brd'){renderBrd();}
+  if(m==='memo'){renderMemos();}
+}
+function goto(m){
+  var u=getUser(); var role=u?u.role:'visitor';
+  if(NEED.indexOf(m)>=0 && role!=='staff'){
+    showModal('权限不足',
+      '当前身份为：访客（未激活）。<br>访客账号仅可访问系统首页、系统日志及个人中心。<br><br>如需使用该功能，请前往「个人中心」输入激活码，激活为校内人员权限。',
+      '<button class="btn" onclick="closeModal();goto(\'profile\');">前往个人中心</button><button class="btn btn-gray" onclick="closeModal()">关闭</button>');
+    return;
+  }
+  if(NOT_READY.indexOf(m)>=0){
+    showModal('模块暂未开放',
+      '该模块正在迁移至新平台，旧系统内暂未开放。如需办理相关业务，请访问新版教务网站。',
+      '<button class="btn" onclick="closeModal()">知道了</button>');
+    return;
+  }
+  setActiveMenu(m);
+  showView(m);
+}
+
+/* ===== 数据层：云端优先，本地兜底 ===== */
+
+/* --- 留言板 --- */
+function renderMsgs(){
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var inp=document.getElementById('msgName');
+  if(inp && !inp.value && name){inp.value=name;}
+  if(cloudReady){
+    fetch('/api/messages').then(function(r){return r.json();}).then(function(data){
+      if(Array.isArray(data)){
+        var h='';
+        for(var i=0;i<data.length;i++){
+          var mine=(data[i].who===name);
+          h+='<div class="item-box"><div class="ihead">'+esc(data[i].time)+' ｜ '+esc(data[i].who)+(mine?' ｜ <a href="javascript:;" onclick="deleteMsg('+data[i].id+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(data[i].content)+'</div></div>';
+        }
+        document.getElementById('msgList').innerHTML=h||'<div class="muted">暂无留言。</div>';
+      } else { localMsgs(); }
+    }).catch(function(){ localMsgs(); });
+  } else { localMsgs(); }
+}
+function localMsgs(){
+  var msgs=getLS(LS_MSGS,[]);
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var h='';
+  for(var i=0;i<msgs.length;i++){
+    var mine=(msgs[i].who===name);
+    h+='<div class="item-box"><div class="ihead">'+esc(msgs[i].time)+' ｜ '+esc(msgs[i].who)+(mine?' ｜ <a href="javascript:;" onclick="localDeleteMsg('+i+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(msgs[i].content)+'</div></div>';
+  }
+  document.getElementById('msgList').innerHTML=h||'<div class="muted">暂无留言。</div>';
+}
+function addMsg(){
+  var who=(document.getElementById('msgName').value||'').trim();
+  var content=(document.getElementById('msgContent').value||'').trim();
+  if(!who||!content){return;}
+  if(cloudReady){
+    fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who,content:content})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d && d.ok){
+        document.getElementById('msgContent').value='';
+        renderMsgs();
+      } else { localAddMsg(who,content); }
+    })
+    .catch(function(){ localAddMsg(who,content); });
+  } else { localAddMsg(who,content); }
+}
+function localAddMsg(who,content){
+  var msgs=getLS(LS_MSGS,[]); msgs.unshift({time:nowStr(),who:who,content:content}); setLS(LS_MSGS,msgs);
+  document.getElementById('msgContent').value='';
+  renderMsgs();
+}
+function deleteMsg(id){
+  if(!confirm('确定删除这条留言吗？')) return;
+  var u=getUser(); var who=u&&u.name?u.name:'';
+  fetch('/api/messages/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d&&d.ok){ renderMsgs(); }
+    else { alert(d.error||'删除失败'); }
+  })
+  .catch(function(){ alert('删除失败'); });
+}
+function localDeleteMsg(idx){
+  if(!confirm('确定删除这条留言吗？')) return;
+  var msgs=getLS(LS_MSGS,[]); msgs.splice(idx,1); setLS(LS_MSGS,msgs);
+  renderMsgs();
+}
+
+/* --- 校内广播 --- */
+function renderBrd(){
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var inp=document.getElementById('brdName');
+  if(inp && !inp.value && name){inp.value=name;}
+  if(cloudReady){
+    fetch('/api/broadcasts').then(function(r){return r.json();}).then(function(data){
+      if(Array.isArray(data)){
+        var h='';
+        for(var i=0;i<data.length;i++){
+          var mine=(data[i].who===name);
+          h+='<div class="item-box"><div class="ihead">'+esc(data[i].time)+' ｜ 广播人：'+esc(data[i].who)+(mine?' ｜ <a href="javascript:;" onclick="deleteBrd('+data[i].id+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(data[i].content)+'</div></div>';
+        }
+        document.getElementById('brdList').innerHTML=h||'<div class="muted">暂无广播记录。</div>';
+      } else { localBrd(); }
+    }).catch(function(){ localBrd(); });
+  } else { localBrd(); }
+}
+function localBrd(){
+  var brds=getLS(LS_BRDS,[]);
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var h='';
+  for(var i=0;i<brds.length;i++){
+    var mine=(brds[i].who===name);
+    h+='<div class="item-box"><div class="ihead">'+esc(brds[i].time)+' ｜ 广播人：'+esc(brds[i].who)+(mine?' ｜ <a href="javascript:;" onclick="localDeleteBrd('+i+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(brds[i].content)+'</div></div>';
+  }
+  document.getElementById('brdList').innerHTML=h||'<div class="muted">暂无广播记录。</div>';
+}
+function addBrd(){
+  var who=(document.getElementById('brdName').value||'').trim();
+  var content=(document.getElementById('brdContent').value||'').trim();
+  if(!who||!content){return;}
+  if(cloudReady){
+    fetch('/api/broadcasts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who,content:content})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d && d.ok){
+        document.getElementById('brdContent').value='';
+        renderBrd();
+      } else { localAddBrd(who,content); }
+    })
+    .catch(function(){ localAddBrd(who,content); });
+  } else { localAddBrd(who,content); }
+}
+function localAddBrd(who,content){
+  var brds=getLS(LS_BRDS,[]); brds.unshift({time:nowStr(),who:who,content:content}); setLS(LS_BRDS,brds);
+  document.getElementById('brdContent').value='';
+  renderBrd();
+}
+function deleteBrd(id){
+  if(!confirm('确定删除这条广播吗？')) return;
+  var u=getUser(); var who=u&&u.name?u.name:'';
+  fetch('/api/broadcasts/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d&&d.ok){ renderBrd(); }
+    else { alert(d.error||'删除失败'); }
+  })
+  .catch(function(){ alert('删除失败'); });
+}
+function localDeleteBrd(idx){
+  if(!confirm('确定删除这条广播吗？')) return;
+  var brds=getLS(LS_BRDS,[]); brds.splice(idx,1); setLS(LS_BRDS,brds);
+  renderBrd();
+}
+
+/* --- 备忘录 --- */
+function renderMemos(){
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var inp=document.getElementById('memoWho');
+  if(inp && !inp.value && name){inp.value=name;}
+  if(cloudReady){
+    fetch('/api/memos').then(function(r){return r.json();}).then(function(data){
+      if(Array.isArray(data)){
+        var h='';
+        for(var i=0;i<data.length;i++){
+          var mine=(data[i].who===name);
+          h+='<div class="item-box"><div class="ihead">'+esc(data[i].who)+' ｜ '+esc(data[i].date)+(mine?' ｜ <a href="javascript:;" onclick="deleteMemo('+data[i].id+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(data[i].task)+'</div></div>';
+        }
+        document.getElementById('memoList').innerHTML=h||'<div class="muted">暂无备忘记录。</div>';
+      } else { localMemos(); }
+    }).catch(function(){ localMemos(); });
+  } else { localMemos(); }
+}
+function localMemos(){
+  var memos=getLS(LS_MEMOS,[]);
+  var u=getUser(); var name=u&&u.name?u.name:'';
+  var h='';
+  for(var i=0;i<memos.length;i++){
+    var mine=(memos[i].who===name);
+    h+='<div class="item-box"><div class="ihead">'+esc(memos[i].who)+' ｜ '+esc(memos[i].date)+(mine?' ｜ <a href="javascript:;" onclick="localDeleteMemo('+i+')" style="color:#c00000;text-decoration:none;">删除</a>':'')+'</div><div class="ibody">'+esc(memos[i].task)+'</div></div>';
+  }
+  document.getElementById('memoList').innerHTML=h||'<div class="muted">暂无备忘记录。</div>';
+}
+function addMemo(){
+  var who=(document.getElementById('memoWho').value||'').trim();
+  var date=document.getElementById('memoDate').value;
+  var task=(document.getElementById('memoTask').value||'').trim();
+  if(!who||!date||!task){return;}
+  if(cloudReady){
+    fetch('/api/memos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who,date:date,task:task})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d && d.ok){
+        document.getElementById('memoTask').value='';
+        renderMemos();
+      } else { localAddMemo(who,date,task); }
+    })
+    .catch(function(){ localAddMemo(who,date,task); });
+  } else { localAddMemo(who,date,task); }
+}
+function localAddMemo(who,date,task){
+  var memos=getLS(LS_MEMOS,[]); memos.unshift({who:who,date:date,task:task}); setLS(LS_MEMOS,memos);
+  document.getElementById('memoTask').value='';
+  renderMemos();
+}
+function deleteMemo(id){
+  if(!confirm('确定删除这条备忘吗？')) return;
+  var u=getUser(); var who=u&&u.name?u.name:'';
+  fetch('/api/memos/'+id,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({who:who})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d&&d.ok){ renderMemos(); }
+    else { alert(d.error||'删除失败'); }
+  })
+  .catch(function(){ alert('删除失败'); });
+}
+function localDeleteMemo(idx){
+  if(!confirm('确定删除这条备忘吗？')) return;
+  var memos=getLS(LS_MEMOS,[]); memos.splice(idx,1); setLS(LS_MEMOS,memos);
+  renderMemos();
+}
+
+/* ===== 系统日志 ===== */
+var SEED_LOG=[
+  {time:"2026-08-29 09:12:03", type:"系统", content:"完成暑期系统维护，数据库例行体检通过。"},
+  {time:"2026-08-30 08:12:44", type:"系统", content:"初始化 2026-2027 学年数据，七年级分班名单已生成。"},
+  {time:"2026-08-30 09:47:05", type:"系统", content:"七年级分班档案导入完成，涉及班级：4 班、7 班、8 班、16 班。"},
+  {time:"2026-08-30 11:23:18", type:"管理", content:"七年级七班班主任丁晓华确认新学年课表安排。"},
+  {time:"2026-08-31 07:55:02", type:"系统", content:"各年级课表生成完毕，周一课程序列已写入数据库。"},
+  {time:"2026-08-31 10:08:37", type:"管理", content:"班级口号备案完成，七年级七班口号已录入系统：一路飞奔，七班超神，激情四射，震撼乾坤。"},
+  {time:"2026-08-31 11:30:00", type:"系统", content:"七年级七班周一课表确认：数学、语文、生物、信息、地理、英语、政治、班会。"},
+  {time:"2026-08-31 14:36:51", type:"系统", content:"执行旧版教务系统停用前最后一次数据快照，迁移组备用密钥 YJ-2026-0901 已归档。"},
+  {time:"2026-08-31 16:02:44", type:"系统", content:"新平台数据校验完成，旧系统将于今日 24:00 进入只读状态。"},
+  {time:"2026-09-01 00:00:01", type:"系统", content:"2026-2027 学年开始，旧版教务系统停止维护，全部业务迁移至新平台。"},
+  {time:"2026-09-01 08:05:16", type:"登录", content:"访客账号访问本系统，查看系统公告。"}
+];
+function renderLog(){
+  var logs=getLS(LS_LOG,[]);
+  if(!localStorage.getItem(LS_LOGFLAG)){
+    var u=getUser(); var name=u&&u.name?u.name:'访客';
+    logs.unshift({time:nowStr(),type:'登录',content:'用户「'+name+'」查看了系统日志。'});
+    setLS(LS_LOG,logs);
+    localStorage.setItem(LS_LOGFLAG,'1');
+  }
+  var h='';
+  for(var i=0;i<logs.length;i++){
+    h+='<div class="log-item"><span class="lt">['+esc(logs[i].time)+']</span><span class="ltype">'+esc(logs[i].type)+'</span>'+esc(logs[i].content)+'</div>';
+  }
+  document.getElementById('logList').innerHTML=h||'<div class="muted">暂无日志记录。</div>';
+}
+
+/* ===== 个人中心 ===== */
+function renderProfile(){
+  var u=getUser(); var name=u&&u.name?u.name:'访客';
+  var staff=(u&&u.role==='staff');
+  document.getElementById('pfName').textContent=name;
+  document.getElementById('pfRole').textContent=staff?'校内人员':'访客';
+  document.getElementById('pfAct').textContent=staff?'已激活':'未激活';
+  document.getElementById('activateBox').style.display=staff?'none':'';
+  document.getElementById('activatedBox').style.display=staff?'':'none';
+}
+function doActivate(){
+  var code=(document.getElementById('actInput').value||'').trim().toUpperCase();
+  if(!code){return;}
+  if(code===ACTIVATION_CODE){
+    var u=getUser(); u.role='staff'; setLS(LS_USER,u);
+    refreshTop(); renderProfile();
+    showModal('激活成功',
+      '恭喜，您已激活为「校内人员」权限。现在可以使用留言板、校内广播、备忘录等校内功能。',
+      '<button class="btn" onclick="closeModal()">进入系统</button>');
+  }else{
+    showModal('激活失败',
+      '激活码无效，请核对后重试。激活码由教务处统一发放，如有疑问请联系教务处。',
+      '<button class="btn btn-gray" onclick="closeModal()">关闭</button>');
+  }
+}
+
+/* ===== 顶部时钟 & 云端探测 ===== */
+function tick(){document.getElementById('topTime').textContent=nowStr();}
+function updateDataStatus(){
+  var el=document.getElementById('dataStatus');
+  if(cloudReady){ el.textContent='云端已连接（全班共享）'; el.className='green'; }
+  else { el.textContent='本地单机（未部署云端）'; el.className='red'; }
+}
+function probeCloud(){
+  fetch('/api/messages').then(function(r){return r.json();}).then(function(d){
+    if(Array.isArray(d)){
+      cloudReady=true;
+    }
+    updateDataStatus();
+  }).catch(function(){
+    updateDataStatus();
+  });
+}
+
+/* ===== 启动 ===== */
+window.onload=function(){
+  refreshTop();
+  probeCloud();
+  var u=getUser();
+  if(u && u.name){ showNotice(); }
+  else { askName(); }
+  tick();
+  setInterval(tick,1000);
+};
+</script>
+</body>
+</html>
